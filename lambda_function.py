@@ -29,7 +29,7 @@ def lambda_handler(event, context):
     TODO: Update SQS url accordingly
     """
     # # Set up params
-    ENDPOINT_NAME = "sms-spam-classifier-mxnet-2021-04-06-02-49-12-273" #replace with your endpoint name.
+    ENDPOINT_NAME = "sms-spam-classifier-mxnet-2021-04-06-15-23-05-776" #replace with your endpoint name.
     try: 
         ENDPOINT_NAME = os.environ["ENDPOINT_NAME"]
     except:
@@ -61,13 +61,14 @@ def lambda_handler(event, context):
     
     from_addr =  re.search('\<(.*?)\>', formatted_email['From']).group(0)[1:-1]
     to_addr = formatted_email['To']
-    sample_body = body
+    sample_body = re.search("(.|\n)*?<div", body).group(0).replace("<div","")
+    print("Extracted sample_body is: {}".format(sample_body))
     #Concatenate sample_body wherever necessary
     if len(body) > 240:
         sample_body = sample_body[:240]
     print("From:", from_addr)
     print("To:", to_addr)
-    print("Email body: ", body)
+    print("Email body: ", sample_body)
 
     # Encode message into ingestable format
     vocabulary_length = 9013
@@ -90,7 +91,16 @@ def lambda_handler(event, context):
     print("Proba:", str(response["predicted_probability"][0][0]))
 
     # Send SES Email
-    reply = "We received your email sent at {} with the subject {}. \n Here is a 240 character sample of the email body:\n {}. \nThis email was classified as {} with a {}% confidence".format(formatted_email['Date'], formatted_email['Subject'], sample_body, classification, str(response["predicted_probability"][0][0]))
+    # reply = "We received your email sent at {} with the subject {}. \n Here is a 240 character sample of the email body:\n {}. \nThis email was classified as {} with a {}% confidence".format(formatted_email['Date'], formatted_email['Subject'], sample_body, classification, str(response["predicted_probability"][0][0]))
+    reply = """We received your email sent at {} with the subject {}. \n
+    Here is a 240 character sample of the email body:\n 
+    <p>{}<p>. 
+    \n<p>This email was classified as {} with a {}% confidence</p>""".format(
+        formatted_email['Date'],
+        formatted_email['Subject'],
+        sample_body, classification,
+        str(response["predicted_probability"][0][0])
+        )
     ses_reply_response = send_SES_email(to_addr, from_addr,reply)
 
     return ({
@@ -132,7 +142,7 @@ def send_SES_email(sender, recipient, body_text=""):
         AWS SDK for Python (Boto)</a>.</p>
     </body>
     </html>
-            """.format(body_text)            
+            """.format(body_text)
 
     # The character encoding for the email.
     CHARSET = "UTF-8"
