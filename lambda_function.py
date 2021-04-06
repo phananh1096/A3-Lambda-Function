@@ -108,8 +108,8 @@ def send_SES_email(sender, recipient, body_text=""):
 
     # Replace recipient@example.com with a "To" address. If your account 
     # is still in the sandbox, this address must be verified.
-    # RECIPIENT = recipient
-    RECIPIENT = "pn2363@columbia.edu"
+    RECIPIENT = recipient
+    # RECIPIENT = "pn2363@columbia.edu"
 
     # If necessary, replace us-west-2 with the AWS Region you're using for Amazon SES.
     AWS_REGION = "us-east-1"
