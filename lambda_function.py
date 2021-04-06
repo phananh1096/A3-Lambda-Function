@@ -1,6 +1,4 @@
 import math
-import dateutil.parser
-import datetime
 import time
 import os
 import logging
@@ -32,6 +30,10 @@ def lambda_handler(event, context):
     """
     # # Set up params
     ENDPOINT_NAME = "sms-spam-classifier-mxnet-2021-04-02-14-03-09-122" #replace with your endpoint name.
+    try: 
+        ENDPOINT_NAME = os.environ["ENDPOINT_NAME"]
+    except:
+        pass
     runtime= boto3.client('runtime.sagemaker')
 
     # # # Get email from S3
@@ -69,8 +71,8 @@ def lambda_handler(event, context):
 
     # Encode message into ingestable format
     vocabulary_length = 9013
-    test_messages = ["FreeMsg: Txt: CALL to No: 86888 & claim your reward of 3 hours talk time to use from your phone now! ubscribe6GBP/ mnth inc 3hrs 16 stop?txtStop"]
-    # test_messages = [body]
+    # test_messages = ["FreeMsg: Txt: CALL to No: 86888 & claim your reward of 3 hours talk time to use from your phone now! ubscribe6GBP/ mnth inc 3hrs 16 stop?txtStop"]
+    test_messages = [body]
     one_hot_test_messages = one_hot_encode(test_messages, vocabulary_length)
     encoded_test_messages = vectorize_sequences(one_hot_test_messages, vocabulary_length)
 
@@ -95,7 +97,7 @@ def lambda_handler(event, context):
         'statusCode': 200,
         'body': {
             "Sagemaker_response": response,
-            # "SES_reply_response": ses_reply_response
+            "SES_reply_response": ses_reply_response
         }
     })
 
