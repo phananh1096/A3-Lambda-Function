@@ -29,7 +29,7 @@ def lambda_handler(event, context):
     TODO: Update SQS url accordingly
     """
     # # Set up params
-    ENDPOINT_NAME = "sms-spam-classifier-mxnet-2021-04-02-14-03-09-122" #replace with your endpoint name.
+    ENDPOINT_NAME = "sms-spam-classifier-mxnet-2021-04-06-02-49-12-273" #replace with your endpoint name.
     try: 
         ENDPOINT_NAME = os.environ["ENDPOINT_NAME"]
     except:
@@ -90,7 +90,7 @@ def lambda_handler(event, context):
     print("Proba:", str(response["predicted_probability"][0][0]))
 
     # Send SES Email
-    reply = "We received your email sent at {} with the subject {}. \n Here is a 240 character sample of the email body:\n {} \n This email was classified as {} with a {}% confidence".format(formatted_email['Date'], formatted_email['Subject'], sample_body, classification, str(response["predicted_probability"][0][0]))
+    reply = "We received your email sent at {} with the subject {}. \n Here is a 240 character sample of the email body:\n {}. \nThis email was classified as {} with a {}% confidence".format(formatted_email['Date'], formatted_email['Subject'], sample_body, classification, str(response["predicted_probability"][0][0]))
     ses_reply_response = send_SES_email(to_addr, from_addr,reply)
 
     return ({
